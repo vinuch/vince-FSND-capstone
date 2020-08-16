@@ -30,15 +30,24 @@ def create_app(test_config=None):
           
         })
       elif request.method == 'POST':
-        return jsonify({
-          'success': True,
-          'method': 'POST'
-        })
-      elif request.method == 'DELETE':
-        return jsonify({
-          'success': True,
-          'method': 'DELETE'
-        })
+        res = request.get_json()
+        attributes = res.get('attributes', None)
+        name = res.get('name', None)
+        age = res.get('age', None)
+        gender = res.get('gender', None)
+        try:
+          new_actor = Actor(attributes=attributes, name=name, age=age, gender=gender)
+          new_actor.insert()
+          actors_selection = Actor.query.all()
+          actors = [actors.format() for actors in actors_selection]
+
+          return jsonify({
+            'success': True,
+            'new': actors
+          })
+        except:
+          abort(401)
+
 
     @app.route('/movies', methods=['GET', 'POST'])
     def handle_movies():
