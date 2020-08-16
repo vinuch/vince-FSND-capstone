@@ -40,8 +40,8 @@ def create_app(test_config=None):
           'method': 'DELETE'
         })
 
-    @app.route('/movies', methods=['GET', 'POST',])
-    def get_movies():
+    @app.route('/movies', methods=['GET', 'POST'])
+    def handle_movies():
       if request.method == 'GET':
         movies_selection = Movie.query.all()
         movies = [movies.format() for movies in movies_selection]
@@ -52,10 +52,22 @@ def create_app(test_config=None):
           
         })
       elif request.method == 'POST':
-        return jsonify({
-          'success': True,
-          'method': 'POST'
-        })
+        res = request.get_json()
+        attributes = res.get('attributes', None)
+        title = res.get('title', None)
+        release_date = res.get('release_date', None)
+        try:
+          new_movie = Movie(attributes=attributes, title=title, release_date=release_date)
+          new_movie.insert()
+          movies_selection = Movie.query.all()
+          movies = [movies.format() for movies in movies_selection]
+
+          return jsonify({
+            'success': True,
+            'new': movies
+          })
+        except:
+          abort(401)
 
     @app.route('/movies/<int:id>', methods=['GET', 'DELETE'])
     def handle_single_movie(id):
