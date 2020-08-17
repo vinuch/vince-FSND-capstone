@@ -1,55 +1,81 @@
-from app import app
+from functools import wraps
+from flask import session
+from urllib.request import urlopen
+import json
+from jose import jwt
 
 
-def requires_auth(f):
-  @wraps(f)
-  def decorated(*args, **kwargs):
-    if 'profile' not in session:
-      # Redirect to Login page here
-      return redirect('/')
-    return f(*args, **kwargs)
+AUTH0_DOMAIN = 'dev-vince.us.auth0.com'
+ALGORITHMS = ['RS256']
+API_AUDIENCE = 'casting_agency'
 
-  return decorated
 
-@app.route('/')
-def home():
-  return render_template('home.html')
+def verify_decode_jwt(token):
+    jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
+    jwks = json.loads(jsonurl.read())
+    unverified_header = jwt.get_unverified_header(token)
+    rsa_key = {}
+    if 'kid' not in unverified_header:
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization malformed.'
+        }, 401)
 
-@app.route('/dashboard')
-@requires_auth
-def dashboard():
-    return render_template('dashboard.html',
-                          userinfo=session['profile'],
-                          userinfo_pretty=json.dumps(session['jwt_payload'], indent=4))
+    for key in jwks['keys']:
+        if key['kid'] == unverified_header['kid']:
+            rsa_key = {
+                'kty': key['kty'],
+                'kid': key['kid'],
+                'use': key['use'],
+                'n': key['n'],
+                'e': key['e']
+            }
+    if rsa_key:
+        try:
+            payload = jwt.decode(
+                token,
+                rsa_key,
+                algorithms=ALGORITHMS,
+                audience=API_AUDIENCE,
+                issuer='https://' + AUTH0_DOMAIN + '/'
+            )
 
-# Here we're using the /callback route.
-@app.route('/callback')
-def callback_handling():
-    # Handles response from token endpoint
-    auth0.authorize_access_token()
-    resp = auth0.get('userinfo')
-    userinfo = resp.json()
+            return payload
 
-    # Store the user information in flask session.
-    session['jwt_payload'] = userinfo
-    session['profile'] = {
-        'user_id': userinfo['sub'],
-        'name': userinfo['name'],
-        'picture': userinfo['picture']
-    }
-    return redirect('/dashboard')
+        except jwt.ExpiredSignatureError:
+            raise AuthError({
+                'code': 'token_expired',
+                'description': 'Token expired.'
+            }, 401)
 
-# /server.py
+        except jwt.JWTClaimsError:
+            raise AuthError({
+                'code': 'invalid_claims',
+                'description': 'Incorrect claims. Please, check the audience and issuer.'
+            }, 401)
+        except Exception:
+            raise AuthError({
+                'code': 'invalid_header',
+                'description': 'Unable to parse authentication token.'
+            }, 401)
+    raise AuthError({
+                'code': 'invalid_header',
+                'description': 'Unable to find the appropriate key.'
+            }, 401)
+    raise Exception('Not Implemented')
 
-@app.route('/login')
-def login():
-    return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback')
-
-@app.route('/logout')
-def logout():
-    # Clear session stored data
-    session.clear()
-    # Redirect user to logout endpoint
-    params = {'returnTo': url_for('home', _external=True), 'client_id': 'ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg'}
-    return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
+def check_permissions(permission, payload):
+    if 'permissions' not in payload:
+        AuthError({
+            'code': 'No_Permissions',
+            'description': 'Permissions was expected as part of jwt payload '
+        }, 401)
     
+    elif permission not in payload['permissions']:
+        AuthError({
+            'code': 'requested_permission_unavailable',
+            'description': 'the requested permission is not availabe for this useer'
+        }, 401)
+    else:
+        return True
+        

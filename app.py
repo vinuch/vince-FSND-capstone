@@ -9,7 +9,7 @@ from flask_cors import CORS
 # from auth import AuthError, requires_auth
 from authlib.integrations.flask_client import OAuth
 from six.moves.urllib.parse import urlencode
-
+from auth import verify_decode_jwt, check_permissions
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -41,24 +41,29 @@ def create_app(test_config=None):
         return response
 
     # /server.py
+    def requires_auth(permission=''):
+      def requires_auth_decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+          if 'profile' not in session:
+            # Redirect to Login page here
+            return redirect('/')
+          token = session['profile']['token']
+          payload = verify_decode_jwt(token)
+          check_permissions(permission, payload)
+          return f(payload, *args, **kwargs)
 
-    def requires_auth(f):
-      @wraps(f)
-      def decorated(*args, **kwargs):
-        if 'profile' not in session:
-          # Redirect to Login page here
-          return redirect('/')
-        return f(*args, **kwargs)
-
-      return decorated
+        return decorated
+      return requires_auth_decorator
 
     @app.route('/')
     def home():
       return render_template('home.html')
     
     @app.route('/dashboard')
-    @requires_auth
-    def dashboard():
+    @requires_auth('delete:actors')
+    def dashboard(payload):
+        auth = request.headers.get('Authorization', None)
         return render_template('dashboard.html',
                               userinfo=session['profile'],
                               userinfo_pretty=json.dumps(session['jwt_payload'], indent=4))
@@ -67,16 +72,18 @@ def create_app(test_config=None):
     @app.route('/callback')
     def callback_handling():
         # Handles response from token endpoint
-        auth0.authorize_access_token()
+        token = auth0.authorize_access_token()
         resp = auth0.get('userinfo')
         userinfo = resp.json()
-
+        print(token['access_token'])
+       
         # Store the user information in flask session.
         session['jwt_payload'] = userinfo
         session['profile'] = {
             'user_id': userinfo['sub'],
             'name': userinfo['name'],
-            'picture': userinfo['picture']
+            'picture': userinfo['picture'],
+            'token': token['access_token']
         }
         return redirect('/dashboard')
     
@@ -84,7 +91,7 @@ def create_app(test_config=None):
 
     @app.route('/login')
     def login():
-        return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback')
+        return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback', audience='casting_agency')
 
     @app.route('/logout')
     def logout():
