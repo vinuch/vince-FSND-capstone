@@ -61,7 +61,7 @@ def create_app(test_config=None):
       return render_template('home.html')
     
     @app.route('/dashboard')
-    @requires_auth('delete:actors')
+    @requires_auth('get:actors')
     def dashboard(payload):
         auth = request.headers.get('Authorization', None)
         return render_template('dashboard.html',
