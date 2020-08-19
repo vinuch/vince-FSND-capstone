@@ -6,28 +6,13 @@ from models import setup_db, Actor, Movie
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-# from auth import AuthError, requires_auth
-from authlib.integrations.flask_client import OAuth
-from six.moves.urllib.parse import urlencode
 from auth import verify_decode_jwt, check_permissions
+from auth import AuthError, requires_auth
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     app.secret_key = 'Theawesomedeveloper'
-
-    oauth = OAuth(app)
-
-    auth0 = oauth.register(
-        'auth0',
-        client_id='ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg',
-        client_secret='LLKOeGYMrDWGiX-Y651omKKpOEML0p8igVDTk_CtyvlkQ9XbdSIefNrhQLOEzYeB',
-        api_base_url='https://dev-vince.us.auth0.com',
-        access_token_url='https://dev-vince.us.auth0.com/oauth/token',
-        authorize_url='https://dev-vince.us.auth0.com/authorize',
-        client_kwargs={
-            'scope': 'openid profile email',
-        },
-    )
 
     setup_db(app)
     cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -40,68 +25,54 @@ def create_app(test_config=None):
                              'GET, POST, PATCH, DELETE, OPTIONS')
         return response
 
-    # /server.py
-    def requires_auth(permission=''):
-      def requires_auth_decorator(f):
-        @wraps(f)
-        def decorated(*args, **kwargs):
-          if 'profile' not in session:
-            # Redirect to Login page here
-            return redirect('/')
-          token = session['profile']['token']
-          payload = verify_decode_jwt(token)
-          check_permissions(permission, payload)
-          return f(payload, *args, **kwargs)
-
-        return decorated
-      return requires_auth_decorator
 
     @app.route('/')
     def home():
       return render_template('home.html')
     
-    @app.route('/dashboard')
-    @requires_auth('get:actors')
-    def dashboard(payload):
-        auth = request.headers.get('Authorization', None)
-        return render_template('dashboard.html',
-                              userinfo=session['profile'],
-                              userinfo_pretty=json.dumps(session['jwt_payload'], indent=4))
+    # @app.route('/dashboard')
+    # @requires_auth('get:actors')
+    # def dashboard(payload):
+    #     auth = request.headers.get('Authorization', None)
+    #     return render_template('dashboard.html',
+    #                           userinfo=session['profile'],
+    #                           userinfo_pretty=json.dumps(session['jwt_payload'], indent=4))
 
-    # Here we're using the /callback route.
-    @app.route('/callback')
-    def callback_handling():
-        # Handles response from token endpoint
-        token = auth0.authorize_access_token()
-        resp = auth0.get('userinfo')
-        userinfo = resp.json()
-        print(token['access_token'])
+    # # Here we're using the /callback route.
+    # @app.route('/callback')
+    # def callback_handling():
+    #     # Handles response from token endpoint
+    #     token = auth0.authorize_access_token()
+    #     resp = auth0.get('userinfo')
+    #     userinfo = resp.json()
+    #     print(token['access_token'])
        
-        # Store the user information in flask session.
-        session['jwt_payload'] = userinfo
-        session['profile'] = {
-            'user_id': userinfo['sub'],
-            'name': userinfo['name'],
-            'picture': userinfo['picture'],
-            'token': token['access_token']
-        }
-        return redirect('/dashboard')
+    #     # Store the user information in flask session.
+    #     session['jwt_payload'] = userinfo
+    #     session['profile'] = {
+    #         'user_id': userinfo['sub'],
+    #         'name': userinfo['name'],
+    #         'picture': userinfo['picture'],
+    #         'token': token['access_token']
+    #     }
+    #     return redirect('/dashboard')
     
     # /server.py
 
-    @app.route('/login')
-    def login():
-        return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback', audience='casting_agency')
+    # @app.route('/login')
+    # def login():
+    #     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback', audience='casting_agency')
 
-    @app.route('/logout')
-    def logout():
-        # Clear session stored data
-        session.clear()
-        # Redirect user to logout endpoint
-        params = {'returnTo': url_for('home', _external=True), 'client_id': 'ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg'}
-        return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
+    # @app.route('/logout')
+    # def logout():
+    #     # Clear session stored data
+    #     session.clear()
+    #     # Redirect user to logout endpoint
+    #     params = {'returnTo': url_for('home', _external=True), 'client_id': 'ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg'}
+    #     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
         
     @app.route('/actors', methods=['GET', 'POST', 'DELETE'])
+    # @requires_auth('get:actors')
     def get_actors():
       if request.method == 'GET':
         actors_selection = Actor.query.all()
@@ -184,6 +155,14 @@ def create_app(test_config=None):
         except:
           abort(401)
   
+    @app.errorhandler(AuthError)
+    def auth_error(error):
+        return jsonify({
+            "success": False,
+            "error": error.status_code,
+            "message": error.error
+        }), error.status_code
+
 
     return app
 

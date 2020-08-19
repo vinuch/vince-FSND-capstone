@@ -1,14 +1,74 @@
-from functools import wraps
-from flask import session
-from urllib.request import urlopen
 import json
+from flask import request, _request_ctx_stack
+from functools import wraps
 from jose import jwt
+from urllib.request import urlopen
 
 
 AUTH0_DOMAIN = 'dev-vince.us.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'casting_agency'
+# https://dev-vince.us.auth0.com/authorize?
+#   response_type=token&
+#   client_id=ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg&
+#   connection=CONNECTION&
+#   redirect_uri=http://127.0.0.1:5000/callback
+## AuthError Exception
+'''
+AuthError Exception
+A standardized way to communicate auth failure modes
+'''
+class AuthError(Exception):
+    def __init__(self, error, status_code):
+        self.error = error
+        self.status_code = status_code
 
+
+def get_token_auth_header():
+    auth = request.headers.get('Authorization', None)
+    
+    if not auth:
+        raise AuthError({
+            'code': 'authorization header missing',
+            'description': 'Authorization header is expected'
+        }, 401)
+
+    parts = auth.split()
+    if parts[0].lower() != 'bearer':
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization header must start with "Bearer".'
+        }, 401)
+
+    elif len(parts) == 1:
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Token not found.'
+        }, 401)
+
+    elif len(parts) > 2:
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization header must be bearer token.'
+        }, 401)
+
+    token = parts[1]
+    return token
+
+def check_permissions(permission, payload):
+    if 'permissions' not in payload:
+        AuthError({
+            'code': 'No_Permissions',
+            'description': 'Permissions was expected as part of jwt payload '
+        }, 401)
+    
+    elif permission not in payload['permissions']:
+        AuthError({
+            'code': 'requested_permission_unavailable',
+            'description': 'the requested permission is not availabe for this useer'
+        }, 401)
+    else:
+        return True
 
 def verify_decode_jwt(token):
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
@@ -64,18 +124,16 @@ def verify_decode_jwt(token):
             }, 401)
     raise Exception('Not Implemented')
 
-def check_permissions(permission, payload):
-    if 'permissions' not in payload:
-        AuthError({
-            'code': 'No_Permissions',
-            'description': 'Permissions was expected as part of jwt payload '
-        }, 401)
-    
-    elif permission not in payload['permissions']:
-        AuthError({
-            'code': 'requested_permission_unavailable',
-            'description': 'the requested permission is not availabe for this useer'
-        }, 401)
-    else:
-        return True
-        
+
+def requires_auth(permission=''):
+    def requires_auth_decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            token = get_token_auth_header()
+            payload = verify_decode_jwt(token)
+            check_permissions(permission, payload)
+            print(payload)
+            return f(payload, *args, **kwargs)
+
+        return wrapper
+    return requires_auth_decorator
