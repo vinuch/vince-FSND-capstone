@@ -2,13 +2,19 @@ import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios"
 
+const AuthAxios = axios.create({
+  baseURL: 'http://127.0.0.1:5000/'
+})
+
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
+    token: localStorage.getItem('JWTS_LOCAL_KEY') || null,
     actors: [],
     movies: [],
     totalQuestions: 0,
+    isLoading: true
   },
   mutations: {
     SET_ACTORS(state, payload) {
@@ -16,36 +22,53 @@ const store = new Vuex.Store({
     },
     SET_MOVIES(state, payload) {
       state.movies = payload
+    },
+    SET_LOADING(state, payload) {
+      state.isLoading = payload
     }
   },
   actions: {
-    getActors({ commit }) {
-      axios
-        .get("/actors")
-        .then(function(response) {
-          // handle success
-          commit('SET_ACTORS', response.data.actors)
-          console.log(response);
-        })
-        .catch(function(error) {
-          // handle error
-          console.log(error);
-        })
-        
+    
+    async getActors({ commit}) {
+      // console.log(this._vm.$auth.token);
+      if(this._vm.$auth.can('get:actors')){
+        AuthAxios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('JWTS_LOCAL_KEY') || null
+        await AuthAxios
+          .get("/actors")
+          .then(function(response) {
+            // handle success
+            commit('SET_ACTORS', response.data.actors)
+            commit('SET_LOADING', false)
+          })
+          .catch(function(error) {
+            // handle error
+            commit('SET_LOADING', false)
+            console.log(error);
+          })
+      }else{
+        commit('SET_LOADING', false)
+      }   
     },
-    getMovies({ commit }) {
-      axios
-        .get("/movies")
-        .then(function(response) {
-          // handle success
-          commit('SET_MOVIES', response.data.movies)
-          console.log(response);
-        })
-        .catch(function(error) {
-          // handle error
-          console.log(error);
-        })
-        
+
+
+    async getMovies({ commit }) {
+      if(this._vm.$auth.can('get:movies')){
+        AuthAxios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('JWTS_LOCAL_KEY') || null
+        await AuthAxios
+          .get("/movies")
+          .then(function(response) {
+            // handle success
+            commit('SET_MOVIES', response.data.movies)
+            commit('SET_LOADING', false)
+          })
+          .catch(function(error) {
+            // handle error
+            commit('SET_LOADING', false)
+            console.log(error);
+          })
+      }else{
+        commit('SET_LOADING', false)
+      } 
     },
   },
   getters: {
@@ -54,6 +77,12 @@ const store = new Vuex.Store({
     },
     movies: state => {
       return state.movies
+    },
+    token: state => {
+      return state.token
+    },
+    isLoading: state => {
+      return state.isLoading
     }
   },
 });

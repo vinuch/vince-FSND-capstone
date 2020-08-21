@@ -1,10 +1,13 @@
 <template>
-  <div class="home h-full py-24 p-4 sm:px-10">
+  <div class="home py-24 p-4 sm:px-10">
     <h1 class=" font-bold text-3xl border-b-4 border-gray-600 inline-block mb-12">ACTORS</h1>
     <!-- <button @click="login">login</button> -->
-    <div class="flex flex-wrap justify-around">
-      <Actorcard v-for="actor in actors" :key="actor.name" :actor="actor"/>
+    <div v-if="isLoading" class="flex justify-center">
+      <img class="align-center" src="../assets/images/load.svg" alt="">
+    </div>
 
+    <div v-else class="flex flex-wrap justify-around">
+      <Actorcard v-for="actor in actors" :key="actor.name" :actor="actor"/>
     </div>
     
   </div>
@@ -14,17 +17,21 @@
 // @ is an alias to /src
 import Actorcard from '@/components/Actorcard.vue'
 import { mapActions, mapGetters } from 'vuex'
-import axios from 'axios'
+// import axios from 'axios'
 
 export default {
   name: 'Home',
   components: {
     Actorcard
   },
+  data(){
+    return {
+      
+    }
+  },
   methods: {
     login(){
-      
-      axios
+      this.$AuthAxios
         .get("/login")
         .then(function(response) {
           // handle success
@@ -42,14 +49,16 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'actors'
+      'actors',
+      'isLoading'
     ])
   },
   mounted() {
     this.getActors()
   },
   created() {
-    console.log(process.env.url)
+    this.$auth.check_token_fragment()
+
   }
 }
 </script>

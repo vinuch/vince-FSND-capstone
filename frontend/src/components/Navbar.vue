@@ -16,10 +16,13 @@
           <a href="/movies" class="nav-link hover:text-gray-600">Movies</a> 
         </li>
         <li class="px-4 font-bold">
-          <button  class="bg-blue-500 px-4 py-1 text-white rounded-md font-bold">
+          <button v-if="auth.token" @click="logout" class="bg-blue-500 px-4 py-1 text-white rounded-md font-bold">
             
-            <a v-if="this.auth.token" :href="loginLink">Logout</a>
-            <a v-else :href="loginLink">Login</a>
+            <span>Logout</span>
+           
+          </button>
+          <button v-else class="bg-blue-500 px-4 py-1 text-white rounded-md font-bold">
+             <a   :href="loginLink">Login</a>
           </button>
         </li>
       </ul>
@@ -31,18 +34,20 @@
 </template>
 
 <script>
-import AuthService from '../auth/AuthService.js'
-// const auth = new AuthService()
-const auth = new AuthService()
 
-
+console.log();
   export default {
     data(){
       return {
-        auth,
-        loginLink: auth.build_login_link('/tabs/user-page'),
-
+        auth: this.$auth,
+        loginLink: this.$auth.build_login_link('/tabs/user-page'),
       }
+    },
+    methods: {
+      logout(){
+        this.$auth.logout()
+        window.location.href = "http://localhost:8080";
+      },
     }
   }
 </script>

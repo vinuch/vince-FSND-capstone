@@ -11,6 +11,7 @@
     "auth0-js": "^9.13.4",
     "core-js": "^3.6.5",
     "eventemitter3": "^4.0.4",
+    "jwt-decode": "^2.2.0",
     "tailwindcss": "^1.6.2",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"

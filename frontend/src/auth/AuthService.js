@@ -84,6 +84,8 @@
 //   }
 // }
 
+var jwtDecode = require('jwt-decode');
+
 export default class AuthService {
   url = 'dev-vince.us'
   audience = 'casting_agency'
@@ -106,6 +108,14 @@ export default class AuthService {
     return link;
   }
 
+  build_logout_link() {
+    let link = 'https://';
+    link += this.url + '.auth0.com';
+    link += '/v2/logout?';
+    link += 'client_id=' + this.clientId + '&';
+    link += 'returnTo=' + this.callbackURL ;
+    return link;
+  }
   // invoked in app.component on load
   check_token_fragment() {
     // parse the fragment
@@ -114,6 +124,7 @@ export default class AuthService {
     if ( fragment[0] === 'access_token' ) {
       // add the access token to the jwt
       this.token = fragment[1];
+      // console.log(fragment[1]);
       // save jwts to localstore
       this.set_jwt();
     }
@@ -127,7 +138,7 @@ export default class AuthService {
   }
 
   load_jwts() {
-    this.token = localStorage.getItem(JWTS_LOCAL_KEY) || null;
+    this.token = localStorage.getItem('JWTS_LOCAL_KEY') || null;
     if (this.token) {
       this.decodeJWT(this.token);
     }
@@ -138,8 +149,8 @@ export default class AuthService {
   }
 
   decodeJWT(token) {
-    const jwtservice = new JwtHelperService();
-    this.payload = jwtservice.decodeToken(token);
+    this.payload = jwtDecode(token);
+    // console.log(this.payload)
     return this.payload;
   }
 

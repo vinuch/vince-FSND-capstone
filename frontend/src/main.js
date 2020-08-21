@@ -4,10 +4,14 @@ import router from './router'
 import Vuex from 'vuex'
 import axios from 'axios'
 import store from './store/index'
+import AuthService from './auth/AuthService.js'
 
+
+Vue.prototype.$auth = new AuthService();
 Vue.prototype.$store = store
 Vue.prototype.$http = axios
-axios.defaults.baseURL = `http://127.0.0.1:5000/`
+axios.defaults.baseURL = `http://127.0.0.1:5000/`;
+
 
 Vue.use(Vuex)
 import './assets/styles/main.css';

@@ -7,14 +7,29 @@
 
 <script>
 import Navbar from '@/components/Navbar.vue'
+
 export default {
   components: {
     Navbar
+  },
+  mounted(){
+    // this.$auth.load_jwts();
+    this.$auth.check_token_fragment()
+    // console.log(this.$auth.token);
+
+  },
+  created(){
+    this.$auth.load_jwts();
+    // console.log(this.$auth.token);
+    this.$auth.check_token_fragment()
   }
 }
 </script>
 
 <style>
+body {
+  background-color: #edf2f7;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
