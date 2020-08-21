@@ -70,6 +70,25 @@ const store = new Vuex.Store({
         commit('SET_LOADING', false)
       } 
     },
+
+    async updateActor({commit}, updated_actor){
+      console.log(updated_actor,)
+      if(this._vm.$auth.can('patch:actors')){
+        AuthAxios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('JWTS_LOCAL_KEY') || null
+        await AuthAxios
+          .patch(`/actors/${updated_actor.id}`, updated_actor)
+          .then(function(response) {
+            // handle success
+            commit('SET_ACTORS', response.data.new)
+            commit('SET_LOADING', false)
+          })
+          .catch(function(error) {
+            // handle error
+            commit('SET_LOADING', false)
+            console.log(error);
+          })
+      }
+    }
   },
   getters: {
     actors: state => {

@@ -7,8 +7,9 @@
     </div>
 
     <div v-else class="flex flex-wrap justify-around">
-      <Actorcard v-for="actor in actors" :key="actor.name" :actor="actor"/>
+      <Actorcard v-for="actor in actors" :key="actor.name" :actor="actor" :editing="editing" @close="editing = !editing" />
     </div>
+    <!-- <EditCard /> -->
     
   </div>
 </template>
@@ -16,17 +17,19 @@
 <script>
 // @ is an alias to /src
 import Actorcard from '@/components/Actorcard.vue'
+// import EditCard from '@/components/EditCard.vue'
 import { mapActions, mapGetters } from 'vuex'
 // import axios from 'axios'
 
 export default {
   name: 'Home',
   components: {
+    // EditCard,
     Actorcard
   },
   data(){
     return {
-      
+      editing: false
     }
   },
   methods: {

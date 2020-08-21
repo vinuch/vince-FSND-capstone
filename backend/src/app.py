@@ -15,7 +15,7 @@ def create_app(test_config=None):
     app.secret_key = 'Theawesomedeveloper'
 
     setup_db(app)
-    cors = CORS(app, resources={r"/*": {"origins": "*"}})
+    cors = CORS(app, resources={r"*": {"origins": "*"}})
 
     @app.after_request
     def after_request(response):
@@ -71,9 +71,9 @@ def create_app(test_config=None):
     #     params = {'returnTo': url_for('home', _external=True), 'client_id': 'ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg'}
     #     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
         
-    @app.route('/actors', methods=['GET', 'POST', 'DELETE'])
-    # @requires_auth('get:actors')
-    def get_actors():
+    @app.route('/actors', methods=['GET', 'POST', 'PATCH', 'DELETE'])
+    @requires_auth('get:actors')
+    def get_actors(payload):
       if request.method == 'GET':
         actors_selection = Actor.query.all()
         actors = [actors.format() for actors in actors_selection]
@@ -85,12 +85,17 @@ def create_app(test_config=None):
         })
       elif request.method == 'POST':
         res = request.get_json()
+        if (not res):
+          abort(401)
+
         attributes = res.get('attributes', None)
         name = res.get('name', None)
         age = res.get('age', None)
         gender = res.get('gender', None)
+        bio = res.get('bio', None)
+        image = res.get('image', None)
         try:
-          new_actor = Actor(attributes=attributes, name=name, age=age, gender=gender)
+          new_actor = Actor(attributes=attributes, name=name, age=age, gender=gender, bio=bio, image=image)
           new_actor.insert()
           actors_selection = Actor.query.all()
           actors = [actors.format() for actors in actors_selection]
@@ -101,10 +106,68 @@ def create_app(test_config=None):
           })
         except:
           abort(401)
+      elif request.method == 'PATCH':
+        res = request.get_json()
+        if (not res):
+          abort(401)
 
+        attributes = res.get('attributes', None)
+        name = res.get('name', None)
+        age = res.get('age', None)
+        gender = res.get('gender', None)
+        bio = res.get('bio', None)
+        image = res.get('image', None)
+        try:
+          current_actor = Actor.query.get()
+          current_actor.update()
+          actors_selection = Actor.query.all()
+          actors = [actors.format() for actors in actors_selection]
+
+          return jsonify({
+            'success': True,
+            'new': actors
+          })
+        except:
+          abort(401)
+
+    @app.route('/actors/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
+    def handle_single_actor(id):
+      if request.method == 'PATCH':
+        print('patch')
+        res = request.get_json()
+        if (not res):
+          print('fail')
+          abort(401)
+
+        attributes = res.get('attributes', None)
+        name = res.get('name', None)
+        age = res.get('age', None)
+        gender = res.get('gender', None)
+        bio = res.get('bio', None)
+        image = res.get('image', None)
+        id = res.get('id', None)
+        try:
+          current_actor = Actor.query.get(id)
+          current_actor.name = name
+          current_actor.age = age
+          current_actor.gender = gender
+          current_actor.bio = bio
+          current_actor.image = image
+
+          current_actor.update()
+          actors_selection = Actor.query.all()
+          actors = [actors.format() for actors in actors_selection]
+
+          return jsonify({
+            'success': True,
+            'new': actors
+          })
+        except:
+          abort(401)
 
     @app.route('/movies', methods=['GET', 'POST'])
-    def handle_movies():
+    @requires_auth('get:movies')
+    def handle_movies(payload):
       if request.method == 'GET':
         movies_selection = Movie.query.all()
         movies = [movies.format() for movies in movies_selection]
@@ -116,11 +179,14 @@ def create_app(test_config=None):
         })
       elif request.method == 'POST':
         res = request.get_json()
-        attributes = res.get('attributes', None)
+        cover_image = res.get('cover_image', None)
         title = res.get('title', None)
         release_date = res.get('release_date', None)
+        description = res.get('description', None)
+        genres = res.get('genres', None)
+        
         try:
-          new_movie = Movie(attributes=attributes, title=title, release_date=release_date)
+          new_movie = Movie(attributes=attributes, title=title, release_date=release_date, description=description, genres=genres, cover_image=cover_image)
           new_movie.insert()
           movies_selection = Movie.query.all()
           movies = [movies.format() for movies in movies_selection]
@@ -132,7 +198,9 @@ def create_app(test_config=None):
         except:
           abort(401)
 
-    @app.route('/movies/<int:id>', methods=['GET', 'DELETE'])
+
+
+    @app.route('/movies/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
     def handle_single_movie(id):
       movie_selection = Movie.query.filter_by(id=id).one_or_none()
       movie = movie_selection.format()

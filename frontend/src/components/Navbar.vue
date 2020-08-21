@@ -46,7 +46,7 @@ console.log();
     methods: {
       logout(){
         this.$auth.logout()
-        window.location.href = "http://localhost:8080";
+        window.location.href = this.$auth.build_logout_link();
       },
     }
   }
