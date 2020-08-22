@@ -9,6 +9,10 @@
     <div v-else class="flex flex-wrap justify-around">
       <Actorcard v-for="actor in actors" :key="actor.name" :actor="actor" :editing="editing" @close="editing = !editing" />
     </div>
+    <button class="mx-4 py-1 rounded-md px-4 bg-blue-500 text-white">
+         Add Actor
+    </button>
+     
     <!-- <EditCard /> -->
     
   </div>

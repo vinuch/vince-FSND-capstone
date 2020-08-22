@@ -67,7 +67,7 @@ class Actor(db.Model):
   gender = Column(String)
   bio = Column(String)
   image = Column(String)
-
+# INSERT INTO actors (name, age, attributes, gender, bio, image) VALUES ('Edeh Vincent', 19, 'Black, super star dev', 'M', 'Vince is a super star dev', 'https://pbs.twimg.com/profile_images/1276578899057618944/ITQ81LmF_400x400.jpg');
   
   def __init__(self, attributes, name, age, gender):
     self.attributes = attributes

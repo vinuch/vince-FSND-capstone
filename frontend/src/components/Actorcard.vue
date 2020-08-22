@@ -7,10 +7,10 @@
       <p class="text-xs">{{actor.bio}}</p>
 
       <div class="flex justify-center items-end mt-6 ">
-        <button :disabled="!auth.can('patch:actors') ? 'disabled' : false " @click="editing = true" class="mx-4 py-1 rounded-md px-4 bg-blue-300 text-white" :class="auth.can('patch:actors') ? 'hover:bg-blue-500': 'false'">
+        <button :disabled="!auth.can('patch:actors') ? 'disabled' : false " @click="editing = true" class="text-xs mx-4 py-2 rounded-md px-4 bg-blue-500 text-white" :class="auth.can('patch:actors') ? 'bg-blue-300': 'false'">
           Edit Actor
         </button>
-        <button class="mx-4 py-1 rounded-md px-4 bg-red-300 hover:bg-red-500 text-white">
+        <button @click="deleteActorClicked" class="text-xs mx-2 py-2 rounded-md px-4 bg-black text-white">
           Delete Actor
         </button>
       </div>
@@ -26,6 +26,8 @@
 
 <script>
 import EditCard from '@/components/EditCard.vue'
+import { mapActions} from 'vuex'
+
 
   export default {
     props: ['actor',],
@@ -38,7 +40,17 @@ import EditCard from '@/components/EditCard.vue'
         editing: false
       }
     },
-
+    methods: {
+      ...mapActions({
+        deleteActor: 'deleteActor'
+      }),
+      deleteActorClicked() {
+        if(confirm('Are you sure you want to delete this actor? you cant get it back if you do')){
+          this.deleteActor(this.actor.id)
+        }
+        
+      }
+    }
   }
 </script>
 

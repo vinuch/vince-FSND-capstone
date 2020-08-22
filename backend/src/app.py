@@ -130,39 +130,55 @@ def create_app(test_config=None):
         except:
           abort(401)
 
-    @app.route('/actors/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
-    def handle_single_actor(id):
-      if request.method == 'PATCH':
-        print('patch')
-        res = request.get_json()
-        if (not res):
-          print('fail')
-          abort(401)
+    @app.route('/actors/<int:id>', methods=['PATCH'])
+    @requires_auth('patch:actors')
+    def patch_single_actor(payload, id):
+      res = request.get_json()
+      if (not res):
+        print('fail')
+        abort(401)
 
-        attributes = res.get('attributes', None)
-        name = res.get('name', None)
-        age = res.get('age', None)
-        gender = res.get('gender', None)
-        bio = res.get('bio', None)
-        image = res.get('image', None)
-        id = res.get('id', None)
-        try:
-          current_actor = Actor.query.get(id)
-          current_actor.name = name
-          current_actor.age = age
-          current_actor.gender = gender
-          current_actor.bio = bio
-          current_actor.image = image
+      attributes = res.get('attributes', None)
+      name = res.get('name', None)
+      age = res.get('age', None)
+      gender = res.get('gender', None)
+      bio = res.get('bio', None)
+      image = res.get('image', None)
+      id = res.get('id', None)
+      try:
+        current_actor = Actor.query.get(id)
+        current_actor.name = name
+        current_actor.age = age
+        current_actor.gender = gender
+        current_actor.bio = bio
+        current_actor.image = image
 
-          current_actor.update()
-          actors_selection = Actor.query.all()
-          actors = [actors.format() for actors in actors_selection]
+        current_actor.update()
+        actors_selection = Actor.query.all()
+        actors = [actors.format() for actors in actors_selection]
+
+        return jsonify({
+          'success': True,
+          'new': actors
+        })
+      except:
+        abort(401)
+
+
+    @app.route('/actors/<int:id>', methods=['DELETE'])
+    @requires_auth('delete:actors')
+    def delete_single_actor(payload, id):
+      try:
+
+          actor_to_delete = Actor.query.get(id)
+          actor_to_delete.delete()
 
           return jsonify({
-            'success': True,
-            'new': actors
+              'success': True,
+              'delete': id
           })
-        except:
+
+      except:
           abort(401)
 
     @app.route('/movies', methods=['GET', 'POST'])

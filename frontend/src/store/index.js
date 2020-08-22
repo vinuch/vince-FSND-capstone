@@ -88,6 +88,26 @@ const store = new Vuex.Store({
             console.log(error);
           })
       }
+    },
+
+    async deleteActor({ commit, dispatch }, id){
+      console.log('delete')
+      if(this._vm.$auth.can('delete:actor')){
+      console.log(id)
+        AuthAxios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('JWTS_LOCAL_KEY') || null
+        await AuthAxios
+          .delete(`/actors/${id}`,)
+          .then(function(response) {
+            // handle success
+            dispatch('getActors')
+            console.log(response.data)
+          })
+          .catch(function(error) {
+            // handle error
+            commit('SET_LOADING', false)
+            console.log(error);
+          })
+      }
     }
   },
   getters: {
