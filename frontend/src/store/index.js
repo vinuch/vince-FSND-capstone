@@ -108,7 +108,26 @@ const store = new Vuex.Store({
             console.log(error);
           })
       }
-    }
+    },
+
+    async createActor({commit}, new_actor){
+      console.log(new_actor,)
+      if(this._vm.$auth.can('post:actor')){
+        AuthAxios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('JWTS_LOCAL_KEY') || null
+        await AuthAxios
+          .post(`/actors`, new_actor)
+          .then(function(response) {
+            // handle success
+            commit('SET_ACTORS', response.data.new)
+            commit('SET_LOADING', false)
+          })
+          .catch(function(error) {
+            // handle error
+            commit('SET_LOADING', false)
+            console.log(error);
+          })
+      }
+    },
   },
   getters: {
     actors: state => {

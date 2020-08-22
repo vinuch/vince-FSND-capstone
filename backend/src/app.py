@@ -94,6 +94,7 @@ def create_app(test_config=None):
         gender = res.get('gender', None)
         bio = res.get('bio', None)
         image = res.get('image', None)
+        # print(attributes)
         try:
           new_actor = Actor(attributes=attributes, name=name, age=age, gender=gender, bio=bio, image=image)
           new_actor.insert()
@@ -105,29 +106,7 @@ def create_app(test_config=None):
             'new': actors
           })
         except:
-          abort(401)
-      elif request.method == 'PATCH':
-        res = request.get_json()
-        if (not res):
-          abort(401)
-
-        attributes = res.get('attributes', None)
-        name = res.get('name', None)
-        age = res.get('age', None)
-        gender = res.get('gender', None)
-        bio = res.get('bio', None)
-        image = res.get('image', None)
-        try:
-          current_actor = Actor.query.get()
-          current_actor.update()
-          actors_selection = Actor.query.all()
-          actors = [actors.format() for actors in actors_selection]
-
-          return jsonify({
-            'success': True,
-            'new': actors
-          })
-        except:
+          print('fail')
           abort(401)
 
     @app.route('/actors/<int:id>', methods=['PATCH'])
