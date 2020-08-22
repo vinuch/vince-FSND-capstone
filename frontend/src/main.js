@@ -8,6 +8,7 @@ import AuthService from './auth/AuthService.js'
 
 
 Vue.prototype.$auth = new AuthService();
+Vue.prototype.$darkmode = false
 Vue.prototype.$store = store
 Vue.prototype.$http = axios
 axios.defaults.baseURL = `http://127.0.0.1:5000/`;

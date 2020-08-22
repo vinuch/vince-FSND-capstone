@@ -1,6 +1,6 @@
 <template>
   <div>
-    <nav class="flex fixed w-full bg-white justify-between  py-4 px-4 sm:px-10 shadow-md z-40">
+    <nav class="flex fixed w-full justify-between  py-4 px-4 sm:px-10 shadow-md z-40" :class="darkmode ? 'bg-blue-900 text-white' : 'bg-white'">
       <h1 class="font-extrabold text-2xl "><a href="/">Sony Studios</a> </h1>
       <div class="hidden sm:block">
         <input class="border rounded-l-lg py-1 px-2" type="text" name="" id="" size="40">
@@ -9,6 +9,7 @@
         </button>
       </div>
       <ul class="hidden lg:flex items-center">
+        <li></li>
         <li class="px-4 font-bold ">
           <a href="/actors" class="nav-link border-b-2 border-blue-300 text-gray-600">Actors</a> 
         </li>
@@ -40,6 +41,7 @@ console.log();
     data(){
       return {
         auth: this.$auth,
+        darkmode: this.$darkmode,
         loginLink: this.$auth.build_login_link('/tabs/user-page'),
       }
     },

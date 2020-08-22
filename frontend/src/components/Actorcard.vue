@@ -1,6 +1,6 @@
 <template>
 
-    <div v-if="!editing" class="bg-gray-100 mb-8 sm:w-3/12 py-10 px-6 mx-2 cursor-pointer transition duration-500 ease-in-out transform hover:-translate-y-4 hover:shadow-xl hover:scale-105">
+    <div v-if="!editing" class="bg-white text-black rounded-md mb-8 sm:w-3/12 py-10 px-6 mx-2 cursor-pointer transition duration-500 ease-in-out transform hover:-translate-y-4 hover:shadow-xl hover:scale-105">
       <div class="h-72 mb-6">
         <img class="rounded-lg shadow-2xl w-72 h-auto" :src="actor.image" alt="idris elba">
       </div>

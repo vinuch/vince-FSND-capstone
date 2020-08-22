@@ -1,5 +1,5 @@
 <template>
-  <div v-if="creating"  class="home relative py-24 p-4 sm:px-10">
+  <div v-if="!creating"  class="home relative py-24 p-4 sm:px-10">
     <h1 class=" font-bold text-3xl border-b-4 border-gray-600 inline-block mb-12">ACTORS</h1>
     <!-- <button @click="login">login</button> -->
     <div v-if="isLoading" class="flex justify-center">

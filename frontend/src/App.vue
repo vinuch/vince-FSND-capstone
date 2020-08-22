@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="bg-gray-200">
+  <div id="app" class=" min-h-screen" :class="darkmode? 'bg-black' : 'bg-gray-200'">
     <Navbar />
     <router-view/>
   </div>
@@ -11,6 +11,11 @@ import Navbar from '@/components/Navbar.vue'
 export default {
   components: {
     Navbar
+  },
+  data(){
+    return {
+      darkmode: this.$darkmode
+    }
   },
   mounted(){
     // this.$auth.load_jwts();
@@ -27,9 +32,6 @@ export default {
 </script>
 
 <style>
-body {
-  background-color: #edf2f7;
-}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
