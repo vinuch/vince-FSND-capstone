@@ -1,13 +1,13 @@
 <template>
   <div v-if="!creating"  class="home relative py-24 p-4 sm:px-10">
-    <h1 class=" font-bold text-3xl border-b-4 border-gray-600 inline-block mb-12">ACTORS</h1>
+    <h1 class=" font-bold text-3xl border-b-4 border-gray-600 inline-block mb-12" :class="darkmode ? 'text-white' : 'text-black' ">ACTORS</h1>
     <!-- <button @click="login">login</button> -->
     <div v-if="isLoading" class="flex justify-center">
       <img class="align-center" src="../assets/images/load.svg" alt="">
     </div>
 
     <div v-else class="flex flex-wrap justify-around mb-16">
-      <Actorcard v-for="actor in actors" :key="actor.name" :actor="actor" :editing="editing" @close="editing = !editing" />
+      <Actorcard v-for="actor in actors" :key="actor.name + actor.id" :actor="actor" :editing="editing" @close="editing = !editing" />
     </div>
 
     
@@ -35,6 +35,7 @@ import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'Home',
+  props: ['darkmode'],
   components: {
     CreateCard,
     Actorcard

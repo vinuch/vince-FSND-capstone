@@ -1,7 +1,7 @@
 <template>
-  <div id="app" class=" min-h-screen" :class="darkmode? 'bg-black' : 'bg-gray-200'">
-    <Navbar />
-    <router-view/>
+  <div id="app" class=" min-h-screen" :class="darkmode ? 'bg-black' : 'bg-gray-200'">
+    <Navbar :darkmode="darkmode" @toggle="toggleDarkmode"/>
+    <router-view :darkmode="darkmode"/>
   </div>
 </template>
 
@@ -14,7 +14,13 @@ export default {
   },
   data(){
     return {
-      darkmode: this.$darkmode
+      darkmode: false
+    }
+  },
+  methods: {
+    toggleDarkmode(){
+      console.log('toggle');
+      this.darkmode = !this.darkmode
     }
   },
   mounted(){

@@ -9,7 +9,11 @@
         </button>
       </div>
       <ul class="hidden lg:flex items-center">
-        <li></li>
+        <li>
+          <div @click="setMode" class="cursor-pointer border rounded-full px-6 h-6 relative mt-1 mr-2">
+            <span class="transition duration-500 ease-in-out " :class="darkmode ? ' top-0 bg-white rounded-full w-6 h-6 absolute transform -translate-x-6' : 'bg-gray-400 rounded-full w-6 h-6 absolute top-0' " ></span>
+          </div>
+        </li>
         <li class="px-4 font-bold ">
           <a href="/actors" class="nav-link border-b-2 border-blue-300 text-gray-600">Actors</a> 
         </li>
@@ -38,10 +42,10 @@
 
 console.log();
   export default {
+  props: ['darkmode'],
     data(){
       return {
         auth: this.$auth,
-        darkmode: this.$darkmode,
         loginLink: this.$auth.build_login_link('/tabs/user-page'),
       }
     },
@@ -50,6 +54,10 @@ console.log();
         this.$auth.logout()
         window.location.href = this.$auth.build_logout_link();
       },
+      setMode(){
+          this.$emit('toggle')
+        },
+
     }
   }
 </script>

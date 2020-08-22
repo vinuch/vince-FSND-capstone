@@ -1,11 +1,11 @@
 <template>
 
-    <div v-if="!editing" class="bg-white text-black rounded-md mb-8 sm:w-3/12 py-10 px-6 mx-2 cursor-pointer transition duration-500 ease-in-out transform hover:-translate-y-4 hover:shadow-xl hover:scale-105">
+    <div v-if="!editing" class="bg-white  rounded-md mb-8 sm:w-3/12 py-10 px-6 mx-2 cursor-pointer transition duration-500 ease-in-out transform hover:-translate-y-4 hover:shadow-xl hover:scale-105">
       <div class="h-72 mb-6">
-        <img class="rounded-lg shadow-2xl w-72 h-auto" :src="actor.image" alt="idris elba">
+        <img class="rounded-lg shadow-2xl w-72 h-auto" :src="actor.image" :alt="'image of ' + actor.name">
       </div>
       <p class="font-bold tracking-wider text-lg mb-4">{{actor.name}}</p>
-      <p class="text-xs">{{actor.bio}}</p>
+      <p class="text-xs text-gray-600">{{actor.bio}}</p>
 
       <div class="flex justify-center items-end mt-6 ">
         <button :disabled="!auth.can('patch:actors') ? 'disabled' : false " @click="editing = true" class="text-xs mx-4 py-2 rounded-md px-4 bg-blue-500 text-white" :class="auth.can('patch:actors') ? 'bg-blue-300': 'false'">
