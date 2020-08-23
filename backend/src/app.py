@@ -138,7 +138,7 @@ def create_app(test_config=None):
 
         return jsonify({
           'success': True,
-          'new': actors
+          'updated': actors
         })
       except:
         abort(401)
@@ -148,15 +148,13 @@ def create_app(test_config=None):
     @requires_auth('delete:actors')
     def delete_single_actor(payload, id):
       try:
+        actor_to_delete = Actor.query.get(id)
+        actor_to_delete.delete()
 
-          actor_to_delete = Actor.query.get(id)
-          actor_to_delete.delete()
-
-          return jsonify({
-              'success': True,
-              'delete': id
-          })
-
+        return jsonify({
+            'success': True,
+            'delete': id
+        })
       except:
           abort(401)
 
@@ -209,15 +207,47 @@ def create_app(test_config=None):
         })
       elif request.method == 'DELETE':
         try:
-          movie_selection.delete()
+          movie_to_delete = Movie.query.get(id)
+          movie_to_delete.delete()
+
           return jsonify({
-            'success': True,
-            'method': 'DELETE',
-            'id': movie['id']
+              'success': True,
+              'delete': id
           })
         except:
+            abort(401)
+
+      elif request.method == 'PATCH':
+        res = request.get_json()
+        if (not res):
+          print('fail')
           abort(401)
-  
+
+        title = res.get('title', None)
+        description = res.get('description', None)
+        release_date = res.get('release_date', None)
+        genres = res.get('genres', None)
+        image = res.get('image', None)
+        id = res.get('id', None)
+        try:
+          current_movie = Movie.query.get(id)
+          current_movie.title = title
+          current_movie.description = description
+          current_movie.release_date = release_date
+          current_movie.genres = genres
+          current_movie.image = image
+
+          current_movie.update()
+          movies_selection = Movie.query.all()
+          movies = [movies.format() for movies in movies_selection]
+
+          return jsonify({
+            'success': True,
+            'updated': movies
+          })
+        except: 
+          abort(401)
+    
     @app.errorhandler(AuthError)
     def auth_error(error):
         return jsonify({

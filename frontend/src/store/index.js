@@ -79,7 +79,7 @@ const store = new Vuex.Store({
           .patch(`/actors/${updated_actor.id}`, updated_actor)
           .then(function(response) {
             // handle success
-            commit('SET_ACTORS', response.data.new)
+            commit('SET_ACTORS', response.data.updated)
             commit('SET_LOADING', false)
           })
           .catch(function(error) {
@@ -126,6 +126,47 @@ const store = new Vuex.Store({
             commit('SET_LOADING', false)
             console.log(error);
           })
+      }
+    },
+
+    async updateMovie({commit}, updated_movie){
+      console.log(updated_movie,)
+      if(this._vm.$auth.can('patch:movies')){
+        AuthAxios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('JWTS_LOCAL_KEY') || null
+        await AuthAxios
+          .patch(`/movies/${updated_movie.id}`, updated_movie)
+          .then(function(response) {
+            // handle success
+            commit('SET_MOVIES', response.data.updated)
+            commit('SET_LOADING', false)
+          })
+          .catch(function(error) {
+            // handle error
+            commit('SET_LOADING', false)
+            console.log(error);
+          })
+      }
+    },
+
+    async deleteMovie({ commit, dispatch }, id){
+      console.log('delete')
+      if(this._vm.$auth.can('delete:movies')){
+      console.log(id)
+        AuthAxios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('JWTS_LOCAL_KEY') || null
+        await AuthAxios
+          .delete(`/movies/${id}`,)
+          .then(function(response) {
+            // handle success
+            dispatch('getMovies')
+            console.log(response.data)
+          })
+          .catch(function(error) {
+            // handle error
+            commit('SET_LOADING', false)
+            console.log(error);
+          })
+      }else{
+        console.log('you are not authorized to delete a movie')
       }
     },
   },

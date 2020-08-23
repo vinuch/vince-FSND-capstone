@@ -21,6 +21,7 @@
 
 <script>
 import EditMovieCard from '@/components/EditMovieCard.vue'
+import { mapActions } from 'vuex'
 
   export default {
     props: ['movie'],
@@ -34,8 +35,14 @@ import EditMovieCard from '@/components/EditMovieCard.vue'
       }
     },
     methods: {
+      ...mapActions({
+        deleteMovie: 'deleteMovie'
+      }),
       deleteMovieClicked() {
-
+        if(confirm('Are you sure you want to delete this actor? you cant get it back if you do')){
+          this.deleteMovie(this.movie.id)
+        }
+        
       }
     }
 
