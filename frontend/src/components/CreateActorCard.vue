@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100 mb-8 sm:w-3/12 py-10 px-8 border cursor-pointer transition duration-500 ease-in-out transform hover:-translate-y-4 hover:shadow-xl hover:scale-105">
+  <div class="bg-gray-100 sm:w-3/12 py-6 px-8 border cursor-pointer transition duration-500 ease-in-out transform hover:-translate-y-4 hover:shadow-xl hover:scale-105">
     <div class="text-left mb-2">
       <label class="font-semibold " for="image">Image URL</label>
       <input type="text" name="Image" class="rounded border w-full py-2 mt-2 text-gray-500 px-2" v-model="new_actor.image"/>
@@ -60,10 +60,6 @@ import { mapActions } from 'vuex'
 
     },
     methods: {
-      onclick(){
-        this.updateActor(this.updated_actor);
-        this.setEditing()
-      },
       setCreating(){
         this.$emit('close')
       },

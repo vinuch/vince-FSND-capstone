@@ -15,7 +15,7 @@ const store = new Vuex.Store({
     movies: [],
     totalQuestions: 0,
     isLoading: true,
-    mode: localStorage.getItem('DARK_MODE') || false
+    mode: localStorage.getItem('DARK_MODE') === null ? true : localStorage.getItem('DARK_MODE')
   },
   mutations: {
     SET_ACTORS(state, payload) {
@@ -27,8 +27,8 @@ const store = new Vuex.Store({
     SET_LOADING(state, payload) {
       state.isLoading = payload
     },
-    SET_MODE(state) {
-      state.mode = !state.mode
+    SET_MODE(state, payload) {
+      state.mode = payload
     }
   },
   actions: {
@@ -174,9 +174,30 @@ const store = new Vuex.Store({
       }
     },
 
-    setMode({commit, state}) {
-      commit('SET_MODE')
-      localStorage.setItem('DARK_MODE', state.mode);
+    async createMovie({commit}, new_movie){
+      console.log(new_movie,)
+      if(this._vm.$auth.can('post:movies')){
+        AuthAxios.defaults.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('JWTS_LOCAL_KEY') || null
+        await AuthAxios
+          .post(`/movies`, new_movie)
+          .then(function(response) {
+            // handle success
+            commit('SET_MOVIES', response.data.movies)
+            commit('SET_LOADING', false)
+          })
+          .catch(function(error) {
+            // handle error
+            commit('SET_LOADING', false)
+            console.log(error);
+          })
+      }
+    },
+
+    setMode({commit}, value) {
+      // console.log(state);
+      localStorage.setItem('DARK_MODE', value);
+      commit('SET_MODE', value)
+      
 
     }
   },

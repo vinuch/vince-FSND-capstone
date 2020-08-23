@@ -1,6 +1,6 @@
 <template>
   <div>
-    <nav class="flex fixed w-full justify-between  py-4 px-4 sm:px-10 shadow-md z-40" :class="darkmode ? 'bg-blue-900 text-white' : 'bg-white'">
+    <nav class="flex fixed w-full justify-between  py-4 px-4 sm:px-10 shadow-md z-40" :class="mode ? 'bg-blue-900 text-white' : 'bg-white'">
       <h1 class="font-extrabold text-2xl "><a href="/">Sony Studios</a> </h1>
       <div class="hidden sm:block">
         <input class="border rounded-l-lg py-1 px-2" type="text" name="" id="" size="40">
@@ -10,8 +10,8 @@
       </div>
       <ul class="hidden lg:flex items-center">
         <li>
-          <div @click="setMode" class="cursor-pointer border rounded-full px-6 h-6 relative mt-1 mr-2">
-            <span class="transition duration-500 ease-in-out " :class="darkmode ? ' top-0 bg-white rounded-full w-6 h-6 absolute transform -translate-x-6' : 'bg-gray-400 rounded-full w-6 h-6 absolute top-0' " ></span>
+          <div @click="setMode(!mode)" class="cursor-pointer border rounded-full px-6 h-6 relative mt-1 mr-2">
+            <span class="transition duration-500 ease-in-out " :class="mode ? ' top-0 bg-white rounded-full w-6 h-6 absolute transform -translate-x-6' : 'bg-gray-400 rounded-full w-6 h-6 absolute top-0' " ></span>
           </div>
         </li>
         <li class="px-4 font-bold ">
@@ -39,10 +39,9 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 
-console.log();
   export default {
-  props: ['darkmode'],
     data(){
       return {
         auth: this.$auth,
@@ -50,14 +49,23 @@ console.log();
       }
     },
     methods: {
+          ...mapActions({
+      setMode: 'setMode'
+    }),
+    // toggleDarkmode(){
+    //   console.log('toggle');
+    //   this.darkmode = !this.darkmode
+    // }
       logout(){
         this.$auth.logout()
         window.location.href = this.$auth.build_logout_link();
       },
-      setMode(){
-          this.$emit('toggle')
-        },
 
+    },
+    computed: {
+      ...mapGetters([
+      'mode'
+    ])
     }
   }
 </script>

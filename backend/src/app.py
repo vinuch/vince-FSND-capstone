@@ -9,6 +9,7 @@ from flask_cors import CORS
 from auth import verify_decode_jwt, check_permissions
 from auth import AuthError, requires_auth
 
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -25,11 +26,10 @@ def create_app(test_config=None):
                              'GET, POST, PATCH, DELETE, OPTIONS')
         return response
 
-
     @app.route('/')
     def home():
-      return render_template('home.html')
-    
+        return render_template('home.html')
+
     # @app.route('/dashboard')
     # @requires_auth('get:actors')
     # def dashboard(payload):
@@ -46,7 +46,7 @@ def create_app(test_config=None):
     #     resp = auth0.get('userinfo')
     #     userinfo = resp.json()
     #     print(token['access_token'])
-       
+
     #     # Store the user information in flask session.
     #     session['jwt_payload'] = userinfo
     #     session['profile'] = {
@@ -56,7 +56,7 @@ def create_app(test_config=None):
     #         'token': token['access_token']
     #     }
     #     return redirect('/dashboard')
-    
+
     # /server.py
 
     # @app.route('/login')
@@ -70,23 +70,53 @@ def create_app(test_config=None):
     #     # Redirect user to logout endpoint
     #     params = {'returnTo': url_for('home', _external=True), 'client_id': 'ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg'}
     #     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
-        
+
     @app.route('/actors', methods=['GET', 'POST', 'PATCH', 'DELETE'])
     @requires_auth('get:actors')
     def get_actors(payload):
-      if request.method == 'GET':
-        actors_selection = Actor.query.all()
-        actors = [actors.format() for actors in actors_selection]
+        if request.method == 'GET':
+            actors_selection = Actor.query.all()
+            actors = [actors.format() for actors in actors_selection]
 
-        return jsonify({
-            'success': True,
-            'actors': actors
-          
-        })
-      elif request.method == 'POST':
+            return jsonify({
+                'success': True,
+                'actors': actors
+
+            })
+        elif request.method == 'POST':
+            res = request.get_json()
+            if (not res):
+                abort(401)
+
+            attributes = res.get('attributes', None)
+            name = res.get('name', None)
+            age = res.get('age', None)
+            gender = res.get('gender', None)
+            bio = res.get('bio', None)
+            image = res.get('image', None)
+            # print(attributes)
+            try:
+                new_actor = Actor(attributes=attributes, name=name,
+                                  age=age, gender=gender, bio=bio, image=image)
+                new_actor.insert()
+                actors_selection = Actor.query.all()
+                actors = [actors.format() for actors in actors_selection]
+
+                return jsonify({
+                    'success': True,
+                    'new': actors
+                })
+            except:
+                print('fail')
+                abort(401)
+
+    @app.route('/actors/<int:id>', methods=['PATCH'])
+    @requires_auth('patch:actors')
+    def patch_single_actor(payload, id):
         res = request.get_json()
         if (not res):
-          abort(401)
+            print('fail')
+            abort(401)
 
         attributes = res.get('attributes', None)
         name = res.get('name', None)
@@ -94,142 +124,110 @@ def create_app(test_config=None):
         gender = res.get('gender', None)
         bio = res.get('bio', None)
         image = res.get('image', None)
-        # print(attributes)
+        id = res.get('id', None)
         try:
-          new_actor = Actor(attributes=attributes, name=name, age=age, gender=gender, bio=bio, image=image)
-          new_actor.insert()
-          actors_selection = Actor.query.all()
-          actors = [actors.format() for actors in actors_selection]
+            current_actor = Actor.query.get(id)
+            current_actor.name = name
+            current_actor.age = age
+            current_actor.gender = gender
+            current_actor.bio = bio
+            current_actor.image = image
 
-          return jsonify({
-            'success': True,
-            'new': actors
-          })
+            current_actor.update()
+            actors_selection = Actor.query.all()
+            actors = [actors.format() for actors in actors_selection]
+
+            return jsonify({
+                'success': True,
+                'updated': actors
+            })
         except:
-          print('fail')
-          abort(401)
-
-    @app.route('/actors/<int:id>', methods=['PATCH'])
-    @requires_auth('patch:actors')
-    def patch_single_actor(payload, id):
-      res = request.get_json()
-      if (not res):
-        print('fail')
-        abort(401)
-
-      attributes = res.get('attributes', None)
-      name = res.get('name', None)
-      age = res.get('age', None)
-      gender = res.get('gender', None)
-      bio = res.get('bio', None)
-      image = res.get('image', None)
-      id = res.get('id', None)
-      try:
-        current_actor = Actor.query.get(id)
-        current_actor.name = name
-        current_actor.age = age
-        current_actor.gender = gender
-        current_actor.bio = bio
-        current_actor.image = image
-
-        current_actor.update()
-        actors_selection = Actor.query.all()
-        actors = [actors.format() for actors in actors_selection]
-
-        return jsonify({
-          'success': True,
-          'updated': actors
-        })
-      except:
-        abort(401)
-
+            abort(401)
 
     @app.route('/actors/<int:id>', methods=['DELETE'])
     @requires_auth('delete:actors')
     def delete_single_actor(payload, id):
-      try:
-        actor_to_delete = Actor.query.get(id)
-        actor_to_delete.delete()
+        try:
+            actor_to_delete = Actor.query.get(id)
+            actor_to_delete.delete()
 
-        return jsonify({
-            'success': True,
-            'delete': id
-        })
-      except:
-          abort(401)
+            return jsonify({
+                'success': True,
+                'delete': id
+            })
+        except:
+            abort(401)
 
-    @app.route('/movies', methods=['GET', 'POST'])
+    @app.route('/movies', methods=['GET'])
     @requires_auth('get:movies')
-    def handle_movies(payload):
+    def get_movies(payload):
       if request.method == 'GET':
-        movies_selection = Movie.query.all()
-        movies = [movies.format() for movies in movies_selection]
-        print(request.method)
-        return jsonify({
-            'success': True,
-            'movies': movies
-          
-        })
-      elif request.method == 'POST':
+            movies_selection = Movie.query.all()
+            movies = [movies.format() for movies in movies_selection]
+            print(request.method)
+            return jsonify({
+                'success': True,
+                'movies': movies
+
+            })
+
+
+    @app.route('/movies', methods=['POST'])
+    @requires_auth('post:movies')
+    def post_movies(payload):
+      if request.method == 'POST':
         res = request.get_json()
-        cover_image = res.get('cover_image', None)
+        cover_image = res.get('image', None)
         title = res.get('title', None)
         release_date = res.get('release_date', None)
         description = res.get('description', None)
         genres = res.get('genres', None)
-        
+
         try:
-          new_movie = Movie(attributes=attributes, title=title, release_date=release_date, description=description, genres=genres, cover_image=cover_image)
-          new_movie.insert()
-          movies_selection = Movie.query.all()
-          movies = [movies.format() for movies in movies_selection]
+            new_movie = Movie(title=title, release_date=release_date,
+                              description=description, genres=genres, cover_image=cover_image)
+            new_movie.insert()
+            movies_selection = Movie.query.all()
+            movies = [movies.format() for movies in movies_selection]
 
-          return jsonify({
-            'success': True,
-            'new': movies
-          })
+            return jsonify({
+                'success': True,
+                'movies': movies
+            })
         except:
-          abort(401)
+            print('fail')
+            abort(401)
 
-
-
-    @app.route('/movies/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
-    def handle_single_movie(id):
+    @app.route('/movies/<int:id>', methods=['GET'])
+    @requires_auth('get:movies')
+    def get_single_movie(payload, id):
       movie_selection = Movie.query.filter_by(id=id).one_or_none()
       movie = movie_selection.format()
 
       if request.method == 'GET':
-        print(movie)
-        return jsonify({
-            'success': True,
-            'movie': movie
-          
-        })
-      elif request.method == 'DELETE':
-        try:
-          movie_to_delete = Movie.query.get(id)
-          movie_to_delete.delete()
-
+          print(movie)
           return jsonify({
               'success': True,
-              'delete': id
-          })
-        except:
-            abort(401)
+              'movie': movie
 
-      elif request.method == 'PATCH':
-        res = request.get_json()
-        if (not res):
+          })
+
+
+    @app.route('/movies/<int:id>', methods=['PATCH'])
+    @requires_auth('patch:movies')
+    def patch_single_movie(payload, id):
+      res = request.get_json()
+      if (not res):
           print('fail')
           abort(401)
 
-        title = res.get('title', None)
-        description = res.get('description', None)
-        release_date = res.get('release_date', None)
-        genres = res.get('genres', None)
-        image = res.get('image', None)
-        id = res.get('id', None)
-        try:
+      title = res.get('title', None)
+      description = res.get('description', None)
+      release_date = res.get('release_date', None)
+      genres = res.get('genres', None)
+      image = res.get('image', None)
+      id = res.get('id', None)
+      try:
           current_movie = Movie.query.get(id)
           current_movie.title = title
           current_movie.description = description
@@ -242,12 +240,27 @@ def create_app(test_config=None):
           movies = [movies.format() for movies in movies_selection]
 
           return jsonify({
-            'success': True,
-            'updated': movies
+              'success': True,
+              'updated': movies
           })
-        except: 
+      except:
           abort(401)
-    
+      
+  
+    @app.route('/movies/<int:id>', methods=['DELETE'])
+    @requires_auth('delete:movies')
+    def delete_single_movie(payload, id):
+      try:
+          movie_to_delete = Movie.query.get(id)
+          movie_to_delete.delete()
+
+          return jsonify({
+              'success': True,
+              'delete': id
+          })
+      except:
+          abort(401)
+
     @app.errorhandler(AuthError)
     def auth_error(error):
         return jsonify({
@@ -256,8 +269,8 @@ def create_app(test_config=None):
             "message": error.error
         }), error.status_code
 
-
     return app
+
 
 APP = create_app()
 

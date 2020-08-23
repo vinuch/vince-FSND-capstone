@@ -4,14 +4,14 @@
       <div class="h-72 mb-6">
         <img class="rounded-lg shadow-2xl w-72 h-auto" :src="actor.image" :alt="'image of ' + actor.name">
       </div>
-      <p class="font-bold tracking-wider text-lg mb-4">{{actor.name}}</p>
+      <p class="font-bold tracking-wider text-lg mb-4 capitalize">{{actor.name}}</p>
       <p class="text-xs text-gray-600">{{actor.bio}}</p>
 
       <div class="flex justify-center items-end mt-6 ">
-        <button :disabled="!auth.can('patch:actors') ? 'disabled' : false " @click="editing = true" class="text-xs mx-4 py-2 rounded-md px-4 bg-blue-500 text-white" :class="auth.can('patch:actors') ? 'bg-blue-300': 'false'">
+        <button :disabled="!auth.can('patch:actors') ? 'disabled' : false " @click="editing = true" class="text-xs mx-4 py-2 rounded-md px-4 text-white" :class="!auth.can('patch:actors') ? 'bg-blue-300 cursor-not-allowed': 'bg-blue-500'">
           Edit Actor
         </button>
-        <button @click="deleteActorClicked" class="text-xs mx-2 py-2 rounded-md px-4 bg-black text-white">
+        <button @click="deleteActorClicked" class="text-xs mx-2 py-2 rounded-md px-4  text-white" :class="!auth.can('patch:actors') ? 'bg-gray-600 cursor-not-allowed': 'bg-black'">
           Delete Actor
         </button>
       </div>
@@ -31,7 +31,7 @@ import { mapActions} from 'vuex'
 
 
   export default {
-    props: ['actor',],
+    props: ['actor'],
     components: {
       EditActorCard
     },

@@ -7,43 +7,43 @@
     </div>
 
     <div v-else class="flex flex-wrap justify-around mb-16">
-      <Actorcard v-for="actor in actors" :key="actor.name + actor.id" :actor="actor" :editing="editing" @close="editing = !editing" />
+      <Actorcard v-for="actor in actors" :key="actor.name + actor.id" :actor="actor"/>
     </div>
 
     
 
-    <button @click="creating = !creating" class="mx-4 py-2 rounded-md px-12 bg-blue-500 text-white">
+    <button @click="creating = !creating" class="mx-4 py-2 rounded-md px-12 text-white" :class="!auth.can('post:actor') ? 'bg-blue-300 cursor-not-allowed': 'bg-blue-500'">
          Add Actor
     </button>
         
   </div>
-  <div v-else class="absolute top-0 h-full left-0 w-full bg-blue-100 bg-opacity-50">
-      <div class="mt-24 flex justify-center items-center">
-        <CreateCard  @close="creating = !creating"/>
-      </div>
-      
+  <div v-else class="absolute top-0 min-h-screen left-0 w-full">
+    <div class="pt-24 flex justify-center items-center">
+      <CreateActorCard  @close="creating = !creating"/>
     </div>
+    
+  </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import Actorcard from '@/components/Actorcard.vue'
-import CreateCard from '@/components/CreateCard.vue'
+import CreateActorCard from '@/components/CreateActorCard.vue'
 // import EditCard from '@/components/EditCard.vue'
 import { mapActions, mapGetters } from 'vuex'
 // import axios from 'axios'
 
 export default {
-  name: 'Home',
+  name: 'Actor',
   props: ['darkmode'],
   components: {
-    CreateCard,
+    CreateActorCard,
     Actorcard
   },
   data(){
     return {
       creating: false,
-      editing: false
+      auth: this.$auth
     }
   },
   methods: {
