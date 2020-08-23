@@ -31,7 +31,8 @@ class Movie(db.Model):
   description = Column(String)
 
   def __init__(self, attributes, title, release_date):
-    self.attributes = attributes
+    self.cover_image = cover_image
+    self.description = description
     self.title = title
     self.release_date = release_date
 

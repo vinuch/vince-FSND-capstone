@@ -18,7 +18,7 @@
     </div>
 
 
-      <EditCard @close="editing = !editing" v-else :actor="actor"/>
+      <EditActorCard @close="editing = !editing" v-else :actor="actor"/>
 
 
 
@@ -26,14 +26,14 @@
 </template>
 
 <script>
-import EditCard from '@/components/EditCard.vue'
+import EditActorCard from '@/components/EditActorCard.vue'
 import { mapActions} from 'vuex'
 
 
   export default {
     props: ['actor',],
     components: {
-      EditCard
+      EditActorCard
     },
     data(){
       return {
