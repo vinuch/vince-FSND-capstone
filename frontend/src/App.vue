@@ -1,27 +1,35 @@
 <template>
-  <div id="app" class=" min-h-screen" :class="darkmode ? 'bg-black' : 'bg-gray-200'">
-    <Navbar :darkmode="darkmode" @toggle="toggleDarkmode"/>
-    <router-view :darkmode="darkmode"/>
+  <div id="app" class=" min-h-screen" :class="mode ? 'bg-black' : 'bg-gray-200'">
+    <Navbar :darkmode="mode" @toggle="setMode"/>
+    <router-view :darkmode="mode"/>
   </div>
 </template>
 
 <script>
 import Navbar from '@/components/Navbar.vue'
-
+import { mapActions, mapGetters } from 'vuex'
+ 
 export default {
   components: {
     Navbar
   },
   data(){
     return {
-      darkmode: false
     }
   },
   methods: {
-    toggleDarkmode(){
-      console.log('toggle');
-      this.darkmode = !this.darkmode
-    }
+    ...mapActions({
+      setMode: 'setMode'
+    }),
+    // toggleDarkmode(){
+    //   console.log('toggle');
+    //   this.darkmode = !this.darkmode
+    // }
+  },
+  computed: {
+    ...mapGetters([
+      'mode'
+    ])
   },
   mounted(){
     // this.$auth.load_jwts();

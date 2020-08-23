@@ -14,7 +14,8 @@ const store = new Vuex.Store({
     actors: [],
     movies: [],
     totalQuestions: 0,
-    isLoading: true
+    isLoading: true,
+    mode: localStorage.getItem('DARK_MODE') || false
   },
   mutations: {
     SET_ACTORS(state, payload) {
@@ -25,6 +26,9 @@ const store = new Vuex.Store({
     },
     SET_LOADING(state, payload) {
       state.isLoading = payload
+    },
+    SET_MODE(state) {
+      state.mode = !state.mode
     }
   },
   actions: {
@@ -169,6 +173,12 @@ const store = new Vuex.Store({
         console.log('you are not authorized to delete a movie')
       }
     },
+
+    setMode({commit, state}) {
+      commit('SET_MODE')
+      localStorage.setItem('DARK_MODE', state.mode);
+
+    }
   },
   getters: {
     actors: state => {
@@ -182,6 +192,9 @@ const store = new Vuex.Store({
     },
     isLoading: state => {
       return state.isLoading
+    },
+    mode: state => {
+      return state.mode
     }
   },
 });
