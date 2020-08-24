@@ -30,46 +30,6 @@ def create_app(test_config=None):
     def home():
         return render_template('home.html')
 
-    # @app.route('/dashboard')
-    # @requires_auth('get:actors')
-    # def dashboard(payload):
-    #     auth = request.headers.get('Authorization', None)
-    #     return render_template('dashboard.html',
-    #                           userinfo=session['profile'],
-    #                           userinfo_pretty=json.dumps(session['jwt_payload'], indent=4))
-
-    # # Here we're using the /callback route.
-    # @app.route('/callback')
-    # def callback_handling():
-    #     # Handles response from token endpoint
-    #     token = auth0.authorize_access_token()
-    #     resp = auth0.get('userinfo')
-    #     userinfo = resp.json()
-    #     print(token['access_token'])
-
-    #     # Store the user information in flask session.
-    #     session['jwt_payload'] = userinfo
-    #     session['profile'] = {
-    #         'user_id': userinfo['sub'],
-    #         'name': userinfo['name'],
-    #         'picture': userinfo['picture'],
-    #         'token': token['access_token']
-    #     }
-    #     return redirect('/dashboard')
-
-    # /server.py
-
-    # @app.route('/login')
-    # def login():
-    #     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback', audience='casting_agency')
-
-    # @app.route('/logout')
-    # def logout():
-    #     # Clear session stored data
-    #     session.clear()
-    #     # Redirect user to logout endpoint
-    #     params = {'returnTo': url_for('home', _external=True), 'client_id': 'ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg'}
-    #     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
     @app.route('/actors', methods=['GET', 'POST', 'PATCH', 'DELETE'])
     @requires_auth('get:actors')
@@ -86,7 +46,7 @@ def create_app(test_config=None):
         elif request.method == 'POST':
             res = request.get_json()
             if (not res):
-                abort(401)
+                abort(422)
 
             attributes = res.get('attributes', None)
             name = res.get('name', None)
@@ -108,15 +68,14 @@ def create_app(test_config=None):
                 })
             except:
                 print('fail')
-                abort(401)
+                abort(422)
 
     @app.route('/actors/<int:id>', methods=['PATCH'])
     @requires_auth('patch:actors')
     def patch_single_actor(payload, id):
         res = request.get_json()
         if (not res):
-            print('fail')
-            abort(401)
+            abort(422)
 
         attributes = res.get('attributes', None)
         name = res.get('name', None)
@@ -124,7 +83,6 @@ def create_app(test_config=None):
         gender = res.get('gender', None)
         bio = res.get('bio', None)
         image = res.get('image', None)
-        id = res.get('id', None)
         try:
             current_actor = Actor.query.get(id)
             current_actor.name = name
@@ -142,7 +100,8 @@ def create_app(test_config=None):
                 'updated': actors
             })
         except:
-            abort(401)
+          print('fail')
+          abort(422)
 
     @app.route('/actors/<int:id>', methods=['DELETE'])
     @requires_auth('delete:actors')
@@ -156,7 +115,7 @@ def create_app(test_config=None):
                 'delete': id
             })
         except:
-            abort(401)
+            abort(422)
 
     @app.route('/movies', methods=['GET'])
     @requires_auth('get:movies')
@@ -177,6 +136,8 @@ def create_app(test_config=None):
     def post_movies(payload):
       if request.method == 'POST':
         res = request.get_json()
+        if not res: 
+          abort(422)
         cover_image = res.get('image', None)
         title = res.get('title', None)
         release_date = res.get('release_date', None)
@@ -219,14 +180,13 @@ def create_app(test_config=None):
       res = request.get_json()
       if (not res):
           print('fail')
-          abort(401)
+          abort(422)
 
       title = res.get('title', None)
       description = res.get('description', None)
       release_date = res.get('release_date', None)
       genres = res.get('genres', None)
       image = res.get('image', None)
-      id = res.get('id', None)
       try:
           current_movie = Movie.query.get(id)
           current_movie.title = title
@@ -244,7 +204,7 @@ def create_app(test_config=None):
               'updated': movies
           })
       except:
-          abort(401)
+          abort(422)
       
   
     @app.route('/movies/<int:id>', methods=['DELETE'])
@@ -259,16 +219,45 @@ def create_app(test_config=None):
               'delete': id
           })
       except:
-          abort(401)
+          abort(422)
+
+    @app.errorhandler(401)
+    def Unauthorized(error):
+        return jsonify({
+            "success": False,
+            "error": 401,
+            "message": "Unauthorized"
+        }), 401
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+          "success": False, 
+          "error": 422,
+          "message": "unprocessable"
+        }), 422
+
+
+    @app.errorhandler(404)
+    def not_found(error):
+      return jsonify({
+        "success": False, 
+        "error": 404,
+        "message": "Not Found"
+      }), 404
+
+
 
     @app.errorhandler(AuthError)
     def auth_error(error):
+        print('hello', error)
         return jsonify({
             "success": False,
             "error": error.status_code,
             "message": error.error
         }), error.status_code
-
+        
+        
     return app
 
 

@@ -8,16 +8,7 @@ from urllib.request import urlopen
 AUTH0_DOMAIN = 'dev-vince.us.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'casting_agency'
-# https://dev-vince.us.auth0.com/authorize?
-#   response_type=token&
-#   client_id=ZjMwTsC1ReuY5060zbDOSfmBgaCC6okg&
-#   connection=CONNECTION&
-#   redirect_uri=http://127.0.0.1:5000/callback
-## AuthError Exception
-'''
-AuthError Exception
-A standardized way to communicate auth failure modes
-'''
+
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
@@ -132,7 +123,6 @@ def requires_auth(permission=''):
             token = get_token_auth_header()
             payload = verify_decode_jwt(token)
             check_permissions(permission, payload)
-            print(payload)
             return f(payload, *args, **kwargs)
 
         return wrapper

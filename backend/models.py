@@ -4,8 +4,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
 
-database_name = "casting_agency"
-database_path = "postgres://{}/{}".format('mac@localhost:5432', database_name)
+database_name = "test_casting_agency"
+if os.environ.get('ENV') == 'production':
+    # Heroku gives us an environment variable called DATABASE_URL when we add a postgres database
+    database_path = os.environ.get('DATABASE_URL')
+else:
+    database_path = "postgres://{}/{}".format('mac@localhost:5432', database_name)
+
 
 db = SQLAlchemy()
 
