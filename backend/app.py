@@ -67,7 +67,6 @@ def create_app(test_config=None):
                     'new': actors
                 })
             except:
-                print('fail')
                 abort(422)
 
     @app.route('/actors/<int:id>', methods=['PATCH'])
@@ -100,7 +99,6 @@ def create_app(test_config=None):
                 'updated': actors
             })
         except:
-          print('fail')
           abort(422)
 
     @app.route('/actors/<int:id>', methods=['DELETE'])
@@ -123,7 +121,6 @@ def create_app(test_config=None):
       if request.method == 'GET':
             movies_selection = Movie.query.all()
             movies = [movies.format() for movies in movies_selection]
-            print(request.method)
             return jsonify({
                 'success': True,
                 'movies': movies
@@ -156,7 +153,6 @@ def create_app(test_config=None):
                 'movies': movies
             })
         except:
-            print('fail')
             abort(401)
 
     @app.route('/movies/<int:id>', methods=['GET'])
@@ -166,7 +162,6 @@ def create_app(test_config=None):
       movie = movie_selection.format()
 
       if request.method == 'GET':
-          print(movie)
           return jsonify({
               'success': True,
               'movie': movie
@@ -179,7 +174,6 @@ def create_app(test_config=None):
     def patch_single_movie(payload, id):
       res = request.get_json()
       if (not res):
-          print('fail')
           abort(422)
 
       title = res.get('title', None)
@@ -250,7 +244,6 @@ def create_app(test_config=None):
 
     @app.errorhandler(AuthError)
     def auth_error(error):
-        print('hello', error)
         return jsonify({
             "success": False,
             "error": error.status_code,
