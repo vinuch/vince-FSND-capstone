@@ -23,6 +23,7 @@ The application :
 The `./backend` directory contains a Flask server that uses SQLAlchemy to interact with a postgress database, and integrates Auth0 for authentication and Role Based Access Control RBAC for protected endpoints. API is hosted [here](https://sony-casting-agency.herokuapp.com/)
 
 [View the README.md within ./backend for more details.](./backend/README.md)
+[API is hosted here](https://sony-casting-agency.herokuapp.com/)
 
 ### Frontend
 
