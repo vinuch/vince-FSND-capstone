@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
 
-database_name = "test_casting_agency"
+database_name = "casting_agency"
 if os.environ.get('ENV') == 'production':
     # Heroku gives us an environment variable called DATABASE_URL when we add a postgres database
     database_path = os.environ.get('DATABASE_URL')
