@@ -3,6 +3,7 @@
 ## Full Stack Nano -  Capstone Project
 
 
+
 BACKSTORY: Sony Studios a small movie casting agency has decided to take the management of their agency including their actors and movies produced online to make things easier for them in the long run, but it has to restrict who can do what on their platform. this is a solution to help cover their needs.
 
 The application :
@@ -22,6 +23,7 @@ The application :
 The `./backend` directory contains a Flask server that uses SQLAlchemy to interact with a postgress database, and integrates Auth0 for authentication and Role Based Access Control RBAC for protected endpoints.
 
 [View the README.md within ./backend for more details.](./backend/README.md)
+[API is hosted here](https://sony-casting-agency.herokuapp.com/)
 
 ### Frontend
 
