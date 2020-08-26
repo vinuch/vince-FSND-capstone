@@ -15,6 +15,18 @@ The application :
 4) Allow the Executive Producer to add and delete movies from the database
 
 
+## Trying it out 
+
+When you sign up and login from the the UI you are assigned a role of Casting Assitant that only has read permissions but if you would like to test out other roles (director and producer) with more permissions use these credentials to login 
+
+## Casting Director
+Email : director@mail.com
+Password: Castingdirector1
+
+## Executive Producer
+Email : producer@mail.com
+Password: Castingproducer1
+
 ## About the Stack
 
 
@@ -23,7 +35,6 @@ The application :
 The `./backend` directory contains a Flask server that uses SQLAlchemy to interact with a postgress database, and integrates Auth0 for authentication and Role Based Access Control RBAC for protected endpoints. API is hosted [here](https://sony-casting-agency.herokuapp.com/)
 
 [View the README.md within ./backend for more details.](./backend/README.md)
-[API is hosted here](https://sony-casting-agency.herokuapp.com/)
 
 ### Frontend
 
